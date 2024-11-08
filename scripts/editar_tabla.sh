@@ -1,33 +1,26 @@
 #!/bin/bash
 
-# Script para editar la configuración de una tabla
 
-# Directorio de configuración
 config_dir="config"
 
-# Verificar si existe el directorio de configuración
 if [[ ! -d $config_dir ]]; then
   echo "El directorio de configuración $config_dir no existe. Crea una tabla primero."
   exit 1
 fi
 
-# Solicitar el nombre de la tabla a editar
 read -p "Ingrese el nombre de la tabla a editar: " nombre_tabla
 config_file="$config_dir/${nombre_tabla}.conf"
 
-# Verificar si el archivo de configuración de la tabla existe
 if [[ ! -f $config_file ]]; then
   echo "La configuración de la tabla $nombre_tabla no existe. Crea la tabla primero."
   exit 1
 fi
 
-# Función para mostrar la configuración actual de la tabla
 function mostrar_configuracion() {
   echo -e "\nConfiguración actual de la tabla $nombre_tabla:"
   cat "$config_file"
 }
 
-# Función para editar un campo
 function editar_campo() {
   read -p "Ingrese el nombre del campo a editar: " campo_nombre
   if ! grep -q "^$campo_nombre:" "$config_file"; then
@@ -35,7 +28,6 @@ function editar_campo() {
     return
   fi
 
-  # Mostrar opciones de modificación
   echo "Seleccione el aspecto que desea modificar:"
   echo "1) Tipo de dato"
   echo "2) Permitir NULL"
@@ -43,7 +35,6 @@ function editar_campo() {
   echo "4) Autoincrementar (solo si es PK)"
   read -p "Opción: " opcion
 
-  # Extraer configuración actual del campo
   tipo=$(grep "^$campo_nombre:" "$config_file" | cut -d':' -f2)
   nulo=$(grep "^$campo_nombre:" "$config_file" | cut -d':' -f3)
   primary_key=$(grep "^$campo_nombre:" "$config_file" | cut -d':' -f4)
@@ -101,12 +92,10 @@ function editar_campo() {
       ;;
   esac
 
-  # Actualizar el archivo de configuración
   sed -i "/^$campo_nombre:/c\\$campo_nombre:$tipo:$nulo:$primary_key" "$config_file"
   echo "Campo $campo_nombre actualizado."
 }
 
-# Función para eliminar un campo
 function eliminar_campo() {
   read -p "Ingrese el nombre del campo a eliminar: " campo_nombre
   if ! grep -q "^$campo_nombre:" "$config_file"; then
@@ -114,12 +103,10 @@ function eliminar_campo() {
     return
   fi
 
-  # Eliminar la línea del campo del archivo de configuración
   sed -i "/^$campo_nombre:/d" "$config_file"
   echo "Campo $campo_nombre eliminado."
 }
 
-# Menú de opciones para editar la tabla
 while true; do
   mostrar_configuracion
   echo -e "\nSeleccione una opción:"
